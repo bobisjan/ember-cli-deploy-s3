@@ -114,6 +114,7 @@ describe('s3', function() {
             assert.equal(s3Params.CacheControl, 'max-age=1234, public');
             assert.equal(s3Params.Expires, '2010');
             assert.isUndefined(s3Params.ContentEncoding);
+            assert.isUndefined(s3Params.Metadata);
           });
       });
 
@@ -144,6 +145,35 @@ describe('s3', function() {
             assert.equal(s3Params.ContentEncoding, 'gzip');
             assert.equal(s3Params.CacheControl, 'max-age=1234, public');
             assert.equal(s3Params.Expires, '2010');
+          });
+      });
+
+      it('sends metadata', function() {
+        var s3Params;
+        s3Client.putObject = function(params, cb) {
+          s3Params = params;
+          cb();
+        };
+
+        var options = {
+          filePaths: ['app.css'],
+          cwd: process.cwd() + '/tests/fixtures/dist',
+          prefix: 'js-app',
+          acl: 'public-read',
+          bucket: 'some-bucket',
+          cacheControl: 'max-age=1234, public',
+          expires: '2010',
+          metadata: {
+            'X-Content-Type-Options': 'nosniff'
+          }
+        };
+
+        var promises = subject.upload(options);
+
+        return assert.isFulfilled(promises)
+          .then(function() {
+            assert.equal(s3Params.ContentType, 'text/css; charset=utf-8');
+            assert.equal(s3Params.Metadata['X-Content-Type-Options'], 'nosniff');
           });
       });
 

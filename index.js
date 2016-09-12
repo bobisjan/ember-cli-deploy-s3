@@ -21,6 +21,7 @@ module.exports = {
         acl: 'public-read',
         cacheControl: 'max-age='+TWO_YEAR_CACHE_PERIOD_IN_SEC+', public',
         expires: EXPIRE_IN_2030,
+        metadata: null,
         distDir: function(context) {
           return context.distDir;
         },
@@ -55,6 +56,7 @@ module.exports = {
         var manifestPath  = this.readConfig('manifestPath');
         var cacheControl  = this.readConfig('cacheControl');
         var expires       = this.readConfig('expires');
+        var metadata      = this.readConfig('metadata');
 
         var filesToUpload = distFiles.filter(minimatch.filter(filePattern, { matchBase: true }));
 
@@ -71,7 +73,8 @@ module.exports = {
           acl: acl,
           manifestPath: manifestPath,
           cacheControl: cacheControl,
-          expires: expires
+          expires: expires,
+          metadata: metadata
         };
 
         this.log('preparing to upload to S3 bucket `' + bucket + '`', { verbose: true });
